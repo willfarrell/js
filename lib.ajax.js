@@ -1,41 +1,26 @@
 //** Ajax Functions **//
 // http://en.wikipedia.org/wiki/Representational_State_Transfer
 // method = GET/POST/PUT/DELETE
-function __io(url, method) {
-    var x = !window.XMLHttpRequest ? new ActiveXObject('Microsoft.XMLHTTP') : new XMLHttpRequest();
-    x.open(method ? method : 'GET', url, false );
+function __io(url, method, data) {
+	method || (method = 'GET');
+	data || (data = null);
+    var x = new XMLHttpRequest(); // new ActiveXObject('Microsoft.XMLHTTP') is for IE <7
+    x.open(method, url, false );
     //x.setRequestHeader('Content-Type', 'text/html');
-    x.send(method ? method : '');
+    x.send(data);
 	return x.responseText;
 }
 
-/*
-function __ioCallback(url, method, callback) {
-    var x = !window.XMLHttpRequest ? new ActiveXObject('Microsoft.XMLHTTP') : new XMLHttpRequest(),
-		xx;
-    x.open(method ? 'PUT' : 'GET', url, false );
-    //x.setRequestHeader('Content-Type', 'text/html');
-	xx = x.xmlhttp;
-	x.xmlhttp.onreadystatechange = function() {
-		if(typeof(xmlhttpChange) !== 'undefined') {
-			xmlhttpChange();
-		}
-		if(typeof(callback) !== 'undefined') {
-			if (typeof(x) !== 'undefined' && x.freed === 0 && x.readyState === 4) {
-				if (xx.status === 200 || xx.status === 304) {
-					callback(xx.responseText);
-				} else {
-					callback(null);
-				}
-				x.freed = 1;
-			}
-		}
-	};
-    x.send(method ? method : '');
-}*/
-
 var x = [];
-function __ioCallback(url, method, callback) {
+/*
+url - unencoded
+method - GET/POST/PUT/DELETE
+data - object {key:value,key:value}
+callback function(){}
+*/
+function __ioCallback(url, method, data, callback) {
+	method || (method = 'GET');
+	data || (data = null);
 	var j, pos;
 	//var pos = i;
 	for (j=0, pos = -1; j<x.length; j++) {
@@ -53,7 +38,7 @@ function __ioCallback(url, method, callback) {
 	}
 	if (x[pos].xmlhttp) {
 		x[pos].freed = 0;
-		x[pos].xmlhttp.open('GET',url,true);
+		x[pos].xmlhttp.open(method,url,true);
 		//x[pos].xmlhttp.setRequestHeader('Access-Control-Allow-Origin', '*');	// Ripple Workaround
 		//x[pos].xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');	// Ripple Workaround
 		x[pos].xmlhttp.onreadystatechange = function() {
@@ -69,11 +54,8 @@ function __ioCallback(url, method, callback) {
 				x[pos].freed = 1;
 			}
 		};
-		if (window.XMLHttpRequest) {
-			x[pos].xmlhttp.send(null);
-		} else if (window.ActiveXObject) {
-			x[pos].xmlhttp.send();
-		}
+		// (object)data => (string)data
+		x[pos].xmlhttp.send(JSON.stringify(data));
 	}
 	return;
 }
