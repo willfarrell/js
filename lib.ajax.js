@@ -55,7 +55,9 @@ function __ioCallback(url, method, data, callback) {
 			}
 		};
 		// (object)data => (string)data
-		x[pos].xmlhttp.send(JSON.stringify(data));
+		if (typeof data == "object") data = objectURL(data);	
+		
+		x[pos].xmlhttp.send(data);
 	}
 	return;
 }
