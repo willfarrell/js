@@ -18,7 +18,7 @@ method - GET/POST/PUT/DELETE
 data - object {key:value,key:value}
 callback function(){}
 */
-function __ioCallback(url, method, data, callback) {
+function __ioCallback(callback, url, method, data) {
 	method || (method = 'GET');
 	data || (data = null);
 	var j, pos;
@@ -31,19 +31,20 @@ function __ioCallback(url, method, data, callback) {
 		x[pos] = {
 			freed: 1,
 			//xmlhttp: false, // o.xmlhttp = !1;
-			xmlhttp: window.XMLHttpRequest
+			/*xmlhttp: window.XMLHttpRequest
 				? new XMLHttpRequest()
-				: window.ActiveXObject && new ActiveXObject('Microsoft.XMLHTTP'),
+				: window.ActiveXObject && new ActiveXObject('Microsoft.XMLHTTP'),*/
+			xmlhttp: new XMLHttpRequest(),
 		}; 
 	}
 	if (x[pos].xmlhttp) {
 		x[pos].freed = 0;
-		x[pos].xmlhttp.open(method,url,true);
+		
 		//x[pos].xmlhttp.setRequestHeader('Access-Control-Allow-Origin', '*');	// Ripple Workaround
 		//x[pos].xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');	// Ripple Workaround
 		x[pos].xmlhttp.onreadystatechange = function() {
 			if (typeof(callback) !== 'undefined'
-				&& typeof(x[pos]) !== 'undefined'
+				//&& typeof(x[pos]) !== 'undefined'
 				&& x[pos].freed === 0
 				&& x[pos].xmlhttp.readyState === 4) {
 				if (x[pos].xmlhttp.status === 200 || x[pos].xmlhttp.status === 304) {
@@ -55,46 +56,15 @@ function __ioCallback(url, method, data, callback) {
 			}
 		};
 		// (object)data => (string)data
-		if (typeof data == "object") data = objectURL(data);	
+		if (typeof data == "object") data = objectURL(data);
+		//log(data);
 		
+		x[pos].xmlhttp.open(method,url,true);
 		x[pos].xmlhttp.send(data);
 	}
 	return;
 }
 
-/*
-
-function __ioCallback(url, method, callback) {
-	var j, pos;
-	//var pos = i;
-	for (j=0, pos = -1; j<x.length; j++) {
-		if (x[j].freed === 1) { pos = j; break; }
-	}
-	if (pos === -1) { pos = x.length; x[pos] = new CXMLReq(1); }
-	if (x[pos].xmlhttp) {
-		x[pos].freed = 0;
-		x[pos].xmlhttp.open('GET',url,true);
-		x[pos].xmlhttp.onreadystatechange = function() {
-			if(typeof(callback) !== 'undefined') {
-				if (typeof(x[pos]) !== 'undefined' && x[pos].freed === 0 && x[pos].xmlhttp.readyState === 4) {
-					if (x[pos].xmlhttp.status === 200 || x[pos].xmlhttp.status === 304) {
-						callback(x[pos].xmlhttp.responseText);
-					} else {
-						callback(null);
-					}
-					x[pos].freed = 1;
-				}
-			}
-		};
-		if (window.XMLHttpRequest) {
-			x[pos].xmlhttp.send(null);
-		} else if (window.ActiveXObject) {
-			x[pos].xmlhttp.send();
-		}
-	}
-	return;
-}
-*/
 
 /*
 JSONP.request('file', fucntion(json, file) {alert(json)})
